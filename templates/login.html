@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Network Access Portal — Login</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Rajdhani:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg:       #0a0c0f;
+    --panel:    #0f1318;
+    --border:   #1e2d3d;
+    --border2:  #2a3f55;
+    --accent:   #00d4ff;
+    --warn:     #ff4444;
+    --text:     #c8d8e8;
+    --text-dim: #5a7a8a;
+    --mono:     'Share Tech Mono', monospace;
+    --sans:     'Rajdhani', sans-serif;
+  }
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--sans);
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    overflow: hidden;
+  }
+  body::before {
+    content: '';
+    position: fixed; inset: 0;
+    background-image:
+      linear-gradient(var(--border) 1px, transparent 1px),
+      linear-gradient(90deg, var(--border) 1px, transparent 1px);
+    background-size: 40px 40px;
+    opacity: 0.4;
+    animation: gridScroll 20s linear infinite;
+    pointer-events: none;
+  }
+  @keyframes gridScroll {
+    0%   { background-position: 0 0; }
+    100% { background-position: 40px 40px; }
+  }
+  body::after {
+    content: '';
+    position: fixed; inset: 0;
+    background: repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0,0,0,0.07) 2px, rgba(0,0,0,0.07) 4px);
+    pointer-events: none;
+    z-index: 1;
+  }
+  .container {
+    position: relative; z-index: 2;
+    width: 420px;
+    animation: fadeIn 0.6s ease forwards;
+  }
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(20px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+  .badge { text-align: center; margin-bottom: 24px; }
+  .badge-icon {
+    display: inline-flex; align-items: center; justify-content: center;
+    width: 56px; height: 56px;
+    border: 2px solid var(--accent); border-radius: 4px;
+    margin-bottom: 12px;
+    box-shadow: 0 0 20px rgba(0,212,255,0.2), inset 0 0 20px rgba(0,212,255,0.05);
+    position: relative;
+  }
+  .badge-icon svg { color: var(--accent); }
+  .badge-icon::before, .badge-icon::after {
+    content: ''; position: absolute;
+    width: 8px; height: 8px;
+    border-color: var(--accent); border-style: solid;
+  }
+  .badge-icon::before { top: -4px; left: -4px; border-width: 2px 0 0 2px; }
+  .badge-icon::after  { bottom: -4px; right: -4px; border-width: 0 2px 2px 0; }
+  .badge-title { font-family: var(--mono); font-size: 11px; letter-spacing: 4px; color: var(--accent); text-transform: uppercase; margin-bottom: 4px; }
+  .badge-sub   { font-family: var(--mono); font-size: 10px; color: var(--text-dim); letter-spacing: 2px; }
+  .panel {
+    background: var(--panel);
+    border: 1px solid var(--border2); border-radius: 2px;
+    padding: 36px 32px;
+    position: relative;
+    box-shadow: 0 0 60px rgba(0,0,0,0.6), 0 0 0 1px rgba(0,212,255,0.05);
+  }
+  .panel::before {
+    content: ''; position: absolute;
+    top: 0; left: 0; right: 0; height: 2px;
+    background: linear-gradient(90deg, transparent, var(--accent), transparent);
+    opacity: 0.8;
+  }
+  .panel-label {
+    font-family: var(--mono); font-size: 10px; color: var(--text-dim);
+    letter-spacing: 3px; text-transform: uppercase;
+    margin-bottom: 28px;
+    display: flex; align-items: center; gap: 10px;
+  }
+  .panel-label::after { content: ''; flex: 1; height: 1px; background: var(--border2); }
+  .field { margin-bottom: 20px; }
+  label { display: block; font-family: var(--mono); font-size: 10px; color: var(--text-dim); letter-spacing: 3px; text-transform: uppercase; margin-bottom: 8px; }
+  .input-wrap { position: relative; display: flex; align-items: center; }
+  .input-icon { position: absolute; left: 12px; color: var(--text-dim); pointer-events: none; transition: color 0.2s; }
+  input[type="text"], input[type="password"] {
+    width: 100%;
+    background: rgba(0,0,0,0.4);
+    border: 1px solid var(--border2); border-radius: 2px;
+    padding: 12px 12px 12px 40px;
+    color: var(--text); font-family: var(--mono); font-size: 14px; letter-spacing: 1px;
+    outline: none; transition: border-color 0.2s, box-shadow 0.2s;
+  }
+  input:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(0,212,255,0.08), 0 0 12px rgba(0,212,255,0.1); }
+  .input-wrap:focus-within .input-icon { color: var(--accent); }
+  .alert-error {
+    background: rgba(255,68,68,0.08); border: 1px solid rgba(255,68,68,0.3);
+    border-left: 3px solid var(--warn); border-radius: 2px;
+    padding: 10px 14px; margin-bottom: 20px;
+    font-family: var(--mono); font-size: 12px; color: var(--warn);
+    display: flex; align-items: center; gap: 8px;
+  }
+  .btn-submit {
+    width: 100%; background: transparent;
+    border: 1px solid var(--accent); border-radius: 2px;
+    color: var(--accent); font-family: var(--sans);
+    font-size: 14px; font-weight: 700; letter-spacing: 4px; text-transform: uppercase;
+    padding: 14px; cursor: pointer; margin-top: 8px;
+    position: relative; overflow: hidden;
+    transition: color 0.25s, box-shadow 0.25s;
+  }
+  .btn-submit::before {
+    content: ''; position: absolute; inset: 0;
+    background: var(--accent); transform: scaleX(0);
+    transform-origin: left; transition: transform 0.25s ease; z-index: 0;
+  }
+  .btn-submit:hover::before { transform: scaleX(1); }
+  .btn-submit:hover { color: var(--bg); box-shadow: 0 0 20px rgba(0,212,255,0.3); }
+  .btn-submit span { position: relative; z-index: 1; }
+  .status-bar {
+    margin-top: 20px; padding-top: 16px; border-top: 1px solid var(--border);
+    display: flex; align-items: center; gap: 8px;
+    font-family: var(--mono); font-size: 10px; color: var(--text-dim);
+  }
+  .status-dot {
+    width: 6px; height: 6px; border-radius: 50%;
+    background: var(--accent); box-shadow: 0 0 6px var(--accent);
+    animation: pulse 2s ease-in-out infinite;
+  }
+  @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.3; } }
+  .status-bar span:last-child { margin-left: auto; color: var(--border2); }
+  .sites {
+    display: flex; gap: 6px; margin-top: 12px; justify-content: center; flex-wrap: wrap;
+  }
+  .site-badge {
+    font-family: var(--mono); font-size: 9px; letter-spacing: 2px;
+    padding: 3px 10px; border-radius: 2px; text-transform: uppercase;
+    border: 1px solid rgba(0,212,255,0.25); color: var(--text-dim);
+  }
+</style>
+</head>
+<body>
+<div class="container">
+  <div class="badge">
+    <div class="badge-icon">
+      <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75m-3-7.036A11.959 11.959 0 013.598 6 11.99 11.99 0 003 9.749c0 5.592 3.824 10.29 9 11.623 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.285z"/>
+      </svg>
+    </div>
+    <div class="badge-title">Network Access Portal</div>
+    <div class="badge-sub">Multi-Site · TFC · DFC · RMC</div>
+    <div class="sites">
+      <span class="site-badge">TFC</span>
+      <span class="site-badge">DFC</span>
+      <span class="site-badge">RMC</span>
+    </div>
+  </div>
+
+  <div class="panel">
+    <div class="panel-label">Domain Authentication</div>
+
+    {% if error %}
+    <div class="alert-error">
+      <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" style="flex-shrink:0">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z"/>
+      </svg>
+      {{ error }}
+    </div>
+    {% endif %}
+
+    <form method="post" action="/login" autocomplete="off">
+      <div class="field">
+        <label for="username">Domain Username</label>
+        <div class="input-wrap">
+          <svg class="input-icon" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z"/>
+          </svg>
+          <input type="text" id="username" name="username" placeholder="username or user@lab1.local" required autofocus/>
+        </div>
+      </div>
+      <div class="field">
+        <label for="password">Password</label>
+        <div class="input-wrap">
+          <svg class="input-icon" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 10-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H6.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z"/>
+          </svg>
+          <input type="password" id="password" name="password" placeholder="••••••••••••" required/>
+        </div>
+      </div>
+      <button type="submit" class="btn-submit"><span>Authenticate</span></button>
+    </form>
+
+    <div class="status-bar">
+      <div class="status-dot"></div>
+      <span>LDAP failover · 3 DCs</span>
+      <span>lab1.local</span>
+    </div>
+  </div>
+</div>
+</body>
+</html>

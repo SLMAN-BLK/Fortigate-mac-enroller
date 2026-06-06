@@ -1,0 +1,17 @@
+[Unit]
+Description=MAC Registration Portal — Multi-Site (FastAPI)
+After=network.target
+
+[Service]
+Type=simple
+User=www-data
+WorkingDirectory=/opt/mac-register
+ExecStart=/opt/mac-register/venv/bin/python -m uvicorn main:app --host 127.0.0.1 --port 8000 --workers 2
+Restart=on-failure
+RestartSec=5
+Environment=PYTHONUNBUFFERED=1
+NoNewPrivileges=true
+PrivateTmp=true
+
+[Install]
+WantedBy=multi-user.target
