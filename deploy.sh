@@ -54,6 +54,6 @@ echo "       Nginx ready ✓"
 
 echo ""
 echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-echo "  Done!  http://192.168.1.62"
+echo "  Done!  http://@ip-de-la-machine"
 echo "  Logs : journalctl -u $SERVICE -f"
 echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
