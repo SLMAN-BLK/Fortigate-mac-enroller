@@ -98,6 +98,11 @@ EXIT;
 cd Fortigate-mac-enroller/
 chmod +x deploy.sh
 ./deploy.sh
+
+cd /opt/mac-register
+mkdir static
+cd static
+mkdir css js
 ```
 
 ---
