@@ -302,55 +302,134 @@ def fg_headers(api_key: str) -> dict:
     }
 
 def fg_base(ip: str) -> str:
-    return f"http://{ip}/api/v2/cmdb"
+    return f"https://{ip}/api/v2/cmdb"
 
 def fg_create_mac_address(fg: dict, obj_name: str, mac: str, owner: str):
-    url     = f"{fg_base(fg['ip'])}/firewall/address"
     headers = fg_headers(fg["key"])
+    base_url = fg_base(fg["ip"])
+
+    # ── Check if object already exists ──
+    check = http_requests.get(
+        f"{base_url}/firewall/address/{obj_name}",
+        headers=headers, timeout=10, verify=False
+    )
+    if check.status_code == 200:
+        existing = check.json().get("results", [{}])[0]
+        if existing.get("name") == obj_name:
+            log.info("FortiGate [%s] address '%s' already exists, skipping create.", fg["ip"], obj_name)
+            return
+
+    # ── Create with correct sub-type for FortiGate 7.6 ──
     payload = {
-        "name":    obj_name,
-        "type":    "mac",
-        "macaddr": [{"macaddr": mac}],
-        "comment": f"Owner: {owner}",
+        "name":     obj_name,
+        "type":     "mac",
+        "sub-type": "ems",          # required in FGT 7.6 for mac-type addresses
+        "macaddr":  [{"macaddr": mac}],
+        "comment":  f"Owner: {owner}",
+        "color":    0,
     }
     r = http_requests.post(
-        url, headers=headers, json=payload, timeout=10, verify=False
+        f"{base_url}/firewall/address",
+        headers=headers, json=payload, timeout=10, verify=False
     )
+
+    # FortiGate sometimes returns 200 with a GET-like body on success
+    # Verify the object was actually created by checking its existence
     if r.status_code not in (200, 201):
         raise RuntimeError(
             f"FortiGate [{fg['ip']}] address create failed: "
             f"{r.status_code} {r.text[:300]}"
         )
-    log.info("FortiGate [%s] address object '%s' created.", fg["ip"], obj_name)
+
+    # Confirm object exists and has the MAC
+    verify = http_requests.get(
+        f"{base_url}/firewall/address/{obj_name}",
+        headers=headers, timeout=10, verify=False
+    )
+    if verify.status_code != 200:
+        raise RuntimeError(
+            f"FortiGate [{fg['ip']}] address '{obj_name}' not found after create — "
+            f"creation may have failed silently"
+        )
+    result = verify.json().get("results", [{}])[0]
+    if not result.get("macaddr"):
+        # Object created but macaddr empty — sub-type issue, try with different sub-type
+        log.warning("FortiGate [%s] address '%s' created but macaddr empty, retrying with sub-type=sdn", fg["ip"], obj_name)
+        # Delete and recreate with sub-type=sdn
+        http_requests.delete(
+            f"{base_url}/firewall/address/{obj_name}",
+            headers=headers, timeout=10, verify=False
+        )
+        payload["sub-type"] = "sdn"
+        r2 = http_requests.post(
+            f"{base_url}/firewall/address",
+            headers=headers, json=payload, timeout=10, verify=False
+        )
+        verify2 = http_requests.get(
+            f"{base_url}/firewall/address/{obj_name}",
+            headers=headers, timeout=10, verify=False
+        )
+        result2 = verify2.json().get("results", [{}])[0]
+        if not result2.get("macaddr"):
+            raise RuntimeError(
+                f"FortiGate [{fg['ip']}] address '{obj_name}' macaddr is empty after creation — "
+                f"check API user permissions for firewall address write"
+            )
+
+    log.info("FortiGate [%s] address object '%s' created with MAC %s.", fg["ip"], obj_name, mac)
 
 def fg_add_to_group(fg: dict, obj_name: str):
     headers = fg_headers(fg["key"])
     group   = fg["group"]
+    url     = f"{fg_base(fg['ip'])}/firewall/addrgrp/{group}"
 
-    # GET current members
-    url = f"{fg_base(fg['ip'])}/firewall/addrgrp/{group}"
-    r   = http_requests.get(url, headers=headers, timeout=10, verify=False)
+    # GET current group object
+    r = http_requests.get(url, headers=headers, timeout=10, verify=False)
     if r.status_code != 200:
         raise RuntimeError(
             f"FortiGate [{fg['ip']}] group '{group}' fetch failed: "
             f"{r.status_code} {r.text[:300]}"
         )
 
-    members = r.json().get("results", [{}])[0].get("member", [])
-    members.append({"name": obj_name})
+    result = r.json().get("results", [{}])[0]
+
+    # Strip members to name-only (FortiGate rejects q_origin_key etc. on write)
+    clean_members = [{"name": m["name"]} for m in result.get("member", []) if m.get("name")]
+    clean_members.append({"name": obj_name})
+
+    # FortiGate 7.6 requires the full group object in the PUT body —
+    # sending only {"member": [...]} returns 424.
+    payload = {
+        "name":           result.get("name", group),
+        "member":         clean_members,
+        "comment":        result.get("comment", ""),
+        "allow-routing":  result.get("allow-routing", "disable"),
+        "color":          result.get("color", 0),
+        "exclude":        result.get("exclude", "disable"),
+        "exclude-member": [],
+        "fabric-object":  result.get("fabric-object", "disable"),
+    }
+
+    log.info(
+        "FortiGate [%s] PUT group '%s' — %d members — adding '%s'",
+        fg["ip"], group, len(clean_members), obj_name
+    )
 
     r2 = http_requests.put(
-        url, headers=headers,
-        json={"member": members},
+        url, headers=headers, json=payload,
         timeout=10, verify=False,
     )
     if r2.status_code != 200:
+        log.error(
+            "FortiGate [%s] group PUT failed — %s — %s",
+            fg["ip"], r2.status_code, r2.text[:500]
+        )
         raise RuntimeError(
             f"FortiGate [{fg['ip']}] group '{group}' update failed: "
             f"{r2.status_code} {r2.text[:300]}"
         )
     log.info(
-        "FortiGate [%s] added '%s' to group '%s'.",
+        "FortiGate [%s] successfully added '%s' to group '%s'.",
         fg["ip"], obj_name, group
     )
 
