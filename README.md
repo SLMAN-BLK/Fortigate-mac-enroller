@@ -103,6 +103,8 @@ cd /opt/mac-register
 mkdir static
 cd static
 mkdir css js
+
+systemctl restart  mac-register
 ```
 
 ---
