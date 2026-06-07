@@ -19,6 +19,8 @@ apt-get install -y -qq python3-pip python3-venv python3-dev \
 
 echo "[2/7] Copying files to $APP_DIR..."
 mkdir -p "$APP_DIR"
+mkdir -p "/opt/mac-register/static/js"
+mkdir -p "/opt/mac-register/static/css"
 cp -r ./* "$APP_DIR/"
 # .env is dotfile, copy explicitly
 [ -f .env ] && cp .env "$APP_DIR/.env"
