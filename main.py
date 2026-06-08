@@ -514,7 +514,7 @@ async def submit_mac(
 
         owner    = sanitize_owner(mac_owner)
         mac      = normalize_mac(mac_address)
-        obj_name = f"MAC-{mac.replace(':', '')}"
+        obj_name = owner
 
         fg_create_mac_address(fg, obj_name, mac, owner)
         fg_add_to_group(fg, obj_name)
