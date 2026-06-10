@@ -5,172 +5,301 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 <title>Network Access Portal — Login</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Rajdhani:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script>
+  // Apply saved theme BEFORE paint to avoid flash
+  (function() {
+    if (localStorage.getItem('theme') === 'dark') {
+      document.documentElement.classList.add('dark');
+    }
+  })();
+</script>
 <style>
+  /* ── LIGHT (default) ── */
   :root {
-    --bg:       #0a0c0f;
-    --panel:    #0f1318;
-    --border:   #1e2d3d;
-    --border2:  #2a3f55;
-    --accent:   #00d4ff;
-    --warn:     #ff4444;
-    --text:     #c8d8e8;
-    --text-dim: #5a7a8a;
-    --mono:     'Share Tech Mono', monospace;
-    --sans:     'Rajdhani', sans-serif;
+    --bg:         #f5f5f5;
+    --panel:      #ffffff;
+    --border:     #e0e0e0;
+    --border2:    #d0d0d0;
+    --accent:     #cc0000;
+    --accent2:    #aa0000;
+    --warn:       #cc0000;
+    --text:       #1a1a1a;
+    --text-dim:   #666666;
+    --text-light: #999999;
+    --input-bg:   #fafafa;
+    --shadow:     rgba(0,0,0,0.06);
   }
+
+  /* ── DARK override ── */
+  :root.dark {
+    --bg:         #0a0c0f;
+    --panel:      #0f1318;
+    --border:     #1e2d3d;
+    --border2:    #2a3f55;
+    --accent:     #cc0000;
+    --accent2:    #aa0000;
+    --warn:       #ff4444;
+    --text:       #c8d8e8;
+    --text-dim:   #5a7a8a;
+    --text-light: #3a5a6a;
+    --input-bg:   rgba(0,0,0,0.3);
+    --shadow:     rgba(0,0,0,0.4);
+  }
+
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
   body {
     background: var(--bg);
     color: var(--text);
-    font-family: var(--sans);
+    font-family: 'Inter', sans-serif;
     min-height: 100vh;
     display: flex;
     align-items: center;
     justify-content: center;
-    position: relative;
-    overflow: hidden;
+    transition: background 0.3s, color 0.3s;
   }
-  body::before {
-    content: '';
-    position: fixed; inset: 0;
-    background-image:
-      linear-gradient(var(--border) 1px, transparent 1px),
-      linear-gradient(90deg, var(--border) 1px, transparent 1px);
-    background-size: 40px 40px;
-    opacity: 0.4;
-    animation: gridScroll 20s linear infinite;
-    pointer-events: none;
+
+  /* ── THEME TOGGLE ── */
+  .theme-toggle {
+    position: fixed;
+    top: 16px; right: 16px;
+    width: 38px; height: 38px;
+    background: var(--panel);
+    border: 1.5px solid var(--border2);
+    border-radius: 50%;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--text-dim);
+    transition: background 0.2s, border-color 0.2s, color 0.2s, box-shadow 0.2s;
+    box-shadow: 0 2px 8px var(--shadow);
+    z-index: 100;
   }
-  @keyframes gridScroll {
-    0%   { background-position: 0 0; }
-    100% { background-position: 40px 40px; }
+
+  .theme-toggle:hover {
+    border-color: var(--accent);
+    color: var(--accent);
+    box-shadow: 0 2px 12px var(--shadow);
   }
-  body::after {
-    content: '';
-    position: fixed; inset: 0;
-    background: repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0,0,0,0.07) 2px, rgba(0,0,0,0.07) 4px);
-    pointer-events: none;
-    z-index: 1;
-  }
+
+  /* Show sun in dark mode, moon in light mode */
+  .icon-moon { display: block; }
+  .icon-sun  { display: none;  }
+  :root.dark .icon-moon { display: none;  }
+  :root.dark .icon-sun  { display: block; }
+
+  /* ── CONTAINER ── */
   .container {
-    position: relative; z-index: 2;
     width: 420px;
-    animation: fadeIn 0.6s ease forwards;
+    padding: 24px;
+    animation: fadeIn 0.4s ease forwards;
   }
+
   @keyframes fadeIn {
-    from { opacity: 0; transform: translateY(20px); }
+    from { opacity: 0; transform: translateY(12px); }
     to   { opacity: 1; transform: translateY(0); }
   }
-  .badge { text-align: center; margin-bottom: 24px; }
+
+  /* ── HEADER ── */
+  .badge { text-align: center; margin-bottom: 28px; }
+
   .badge-icon {
-    display: inline-flex; align-items: center; justify-content: center;
-    width: 56px; height: 56px;
-    border: 2px solid var(--accent); border-radius: 4px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 52px; height: 52px;
+    background: var(--accent);
+    border-radius: 10px;
+    margin-bottom: 16px;
+    color: #fff;
+    box-shadow: 0 4px 12px rgba(204,0,0,0.3);
+  }
+
+  .badge-title {
+    font-size: 20px;
+    font-weight: 700;
+    color: var(--text);
+    margin-bottom: 4px;
+    letter-spacing: -0.3px;
+  }
+
+  .badge-sub {
+    font-size: 13px;
+    color: var(--text-dim);
     margin-bottom: 12px;
-    box-shadow: 0 0 20px rgba(0,212,255,0.2), inset 0 0 20px rgba(0,212,255,0.05);
-    position: relative;
   }
-  .badge-icon svg { color: var(--accent); }
-  .badge-icon::before, .badge-icon::after {
-    content: ''; position: absolute;
-    width: 8px; height: 8px;
-    border-color: var(--accent); border-style: solid;
+
+  .sites { display: flex; gap: 6px; justify-content: center; flex-wrap: wrap; }
+
+  .site-badge {
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 1px;
+    padding: 3px 10px;
+    border-radius: 20px;
+    text-transform: uppercase;
+    background: var(--input-bg);
+    color: var(--text-dim);
+    border: 1px solid var(--border);
   }
-  .badge-icon::before { top: -4px; left: -4px; border-width: 2px 0 0 2px; }
-  .badge-icon::after  { bottom: -4px; right: -4px; border-width: 0 2px 2px 0; }
-  .badge-title { font-family: var(--mono); font-size: 11px; letter-spacing: 4px; color: var(--accent); text-transform: uppercase; margin-bottom: 4px; }
-  .badge-sub   { font-family: var(--mono); font-size: 10px; color: var(--text-dim); letter-spacing: 2px; }
+
+  /* ── PANEL ── */
   .panel {
     background: var(--panel);
-    border: 1px solid var(--border2); border-radius: 2px;
-    padding: 36px 32px;
-    position: relative;
-    box-shadow: 0 0 60px rgba(0,0,0,0.6), 0 0 0 1px rgba(0,212,255,0.05);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 32px;
+    box-shadow: 0 2px 16px var(--shadow);
+    transition: background 0.3s, border-color 0.3s;
   }
-  .panel::before {
-    content: ''; position: absolute;
-    top: 0; left: 0; right: 0; height: 2px;
-    background: linear-gradient(90deg, transparent, var(--accent), transparent);
-    opacity: 0.8;
-  }
+
   .panel-label {
-    font-family: var(--mono); font-size: 10px; color: var(--text-dim);
-    letter-spacing: 3px; text-transform: uppercase;
-    margin-bottom: 28px;
-    display: flex; align-items: center; gap: 10px;
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--text-dim);
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    margin-bottom: 24px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
   }
-  .panel-label::after { content: ''; flex: 1; height: 1px; background: var(--border2); }
-  .field { margin-bottom: 20px; }
-  label { display: block; font-family: var(--mono); font-size: 10px; color: var(--text-dim); letter-spacing: 3px; text-transform: uppercase; margin-bottom: 8px; }
+
+  .panel-label::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: var(--border);
+  }
+
+  /* ── FORM ── */
+  .field { margin-bottom: 18px; }
+
+  label {
+    display: block;
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--text-dim);
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+    margin-bottom: 7px;
+  }
+
   .input-wrap { position: relative; display: flex; align-items: center; }
-  .input-icon { position: absolute; left: 12px; color: var(--text-dim); pointer-events: none; transition: color 0.2s; }
-  input[type="text"], input[type="password"] {
+
+  .input-icon {
+    position: absolute;
+    left: 12px;
+    color: var(--text-light);
+    pointer-events: none;
+    transition: color 0.2s;
+  }
+
+  input[type="text"],
+  input[type="password"] {
     width: 100%;
-    background: rgba(0,0,0,0.4);
-    border: 1px solid var(--border2); border-radius: 2px;
-    padding: 12px 12px 12px 40px;
-    color: var(--text); font-family: var(--mono); font-size: 14px; letter-spacing: 1px;
-    outline: none; transition: border-color 0.2s, box-shadow 0.2s;
+    background: var(--input-bg);
+    border: 1.5px solid var(--border);
+    border-radius: 8px;
+    padding: 11px 12px 11px 40px;
+    color: var(--text);
+    font-family: 'Inter', sans-serif;
+    font-size: 14px;
+    outline: none;
+    transition: border-color 0.2s, box-shadow 0.2s, background 0.3s, color 0.3s;
   }
-  input:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(0,212,255,0.08), 0 0 12px rgba(0,212,255,0.1); }
+
+  input:focus {
+    border-color: var(--accent);
+    background: var(--panel);
+    box-shadow: 0 0 0 3px rgba(204,0,0,0.1);
+  }
+
   .input-wrap:focus-within .input-icon { color: var(--accent); }
+
+  /* ── ERROR ── */
   .alert-error {
-    background: rgba(255,68,68,0.08); border: 1px solid rgba(255,68,68,0.3);
-    border-left: 3px solid var(--warn); border-radius: 2px;
-    padding: 10px 14px; margin-bottom: 20px;
-    font-family: var(--mono); font-size: 12px; color: var(--warn);
-    display: flex; align-items: center; gap: 8px;
+    background: rgba(204,0,0,0.07);
+    border: 1px solid rgba(204,0,0,0.25);
+    border-left: 3px solid var(--warn);
+    border-radius: 8px;
+    padding: 10px 14px;
+    margin-bottom: 18px;
+    font-size: 13px;
+    color: var(--warn);
+    display: flex;
+    align-items: center;
+    gap: 8px;
   }
+
+  /* ── BUTTON ── */
   .btn-submit {
-    width: 100%; background: transparent;
-    border: 1px solid var(--accent); border-radius: 2px;
-    color: var(--accent); font-family: var(--sans);
-    font-size: 14px; font-weight: 700; letter-spacing: 4px; text-transform: uppercase;
-    padding: 14px; cursor: pointer; margin-top: 8px;
-    position: relative; overflow: hidden;
-    transition: color 0.25s, box-shadow 0.25s;
+    width: 100%;
+    background: var(--accent);
+    border: none;
+    border-radius: 8px;
+    color: #fff;
+    font-family: 'Inter', sans-serif;
+    font-size: 14px;
+    font-weight: 600;
+    padding: 13px;
+    cursor: pointer;
+    margin-top: 6px;
+    transition: background 0.2s, box-shadow 0.2s, transform 0.1s;
+    box-shadow: 0 2px 8px rgba(204,0,0,0.3);
   }
-  .btn-submit::before {
-    content: ''; position: absolute; inset: 0;
-    background: var(--accent); transform: scaleX(0);
-    transform-origin: left; transition: transform 0.25s ease; z-index: 0;
-  }
-  .btn-submit:hover::before { transform: scaleX(1); }
-  .btn-submit:hover { color: var(--bg); box-shadow: 0 0 20px rgba(0,212,255,0.3); }
-  .btn-submit span { position: relative; z-index: 1; }
+
+  .btn-submit:hover { background: var(--accent2); box-shadow: 0 4px 14px rgba(204,0,0,0.4); }
+  .btn-submit:active { transform: scale(0.99); }
+
+  /* ── STATUS BAR ── */
   .status-bar {
-    margin-top: 20px; padding-top: 16px; border-top: 1px solid var(--border);
-    display: flex; align-items: center; gap: 8px;
-    font-family: var(--mono); font-size: 10px; color: var(--text-dim);
+    margin-top: 20px;
+    padding-top: 16px;
+    border-top: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 11px;
+    color: var(--text-light);
   }
+
   .status-dot {
-    width: 6px; height: 6px; border-radius: 50%;
-    background: var(--accent); box-shadow: 0 0 6px var(--accent);
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    background: #22c55e;
+    box-shadow: 0 0 4px #22c55e;
     animation: pulse 2s ease-in-out infinite;
+    flex-shrink: 0;
   }
-  @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.3; } }
-  .status-bar span:last-child { margin-left: auto; color: var(--border2); }
-  .sites {
-    display: flex; gap: 6px; margin-top: 12px; justify-content: center; flex-wrap: wrap;
-  }
-  .site-badge {
-    font-family: var(--mono); font-size: 9px; letter-spacing: 2px;
-    padding: 3px 10px; border-radius: 2px; text-transform: uppercase;
-    border: 1px solid rgba(0,212,255,0.25); color: var(--text-dim);
-  }
+
+  @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.4; } }
+  .status-bar span:last-child { margin-left: auto; }
 </style>
 </head>
 <body>
+
+<!-- Theme toggle button -->
+<button class="theme-toggle" onclick="toggleTheme()" title="Toggle dark/light mode">
+  <svg class="icon-moon" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+    <path stroke-linecap="round" stroke-linejoin="round" d="M21.752 15.002A9.718 9.718 0 0118 15.75 9.75 9.75 0 018.25 6c0-1.33.266-2.597.748-3.752A9.753 9.753 0 003 11.25 9.75 9.75 0 0021 12c0-.338-.017-.672-.048-1l-.2-.998z"/>
+  </svg>
+  <svg class="icon-sun" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+    <path stroke-linecap="round" stroke-linejoin="round" d="M12 3v2.25m6.364.386l-1.591 1.591M21 12h-2.25m-.386 6.364l-1.591-1.591M12 18.75V21m-4.773-4.227l-1.591 1.591M5.25 12H3m4.227-4.773L5.636 5.636M15.75 12a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0z"/>
+  </svg>
+</button>
+
 <div class="container">
   <div class="badge">
     <div class="badge-icon">
-      <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
+      <svg width="26" height="26" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
         <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75m-3-7.036A11.959 11.959 0 013.598 6 11.99 11.99 0 003 9.749c0 5.592 3.824 10.29 9 11.623 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.285z"/>
       </svg>
     </div>
     <div class="badge-title">Network Access Portal</div>
-    <div class="badge-sub">Multi-Site · TFC · DFC · RMC</div>
+    <div class="badge-sub">Multi-Site · lab1.local</div>
     <div class="sites">
       <span class="site-badge">TFC</span>
       <span class="site-badge">DFC</span>
@@ -209,7 +338,7 @@
           <input type="password" id="password" name="password" placeholder="••••••••••••" required/>
         </div>
       </div>
-      <button type="submit" class="btn-submit"><span>Authenticate</span></button>
+      <button type="submit" class="btn-submit">Sign In</button>
     </form>
 
     <div class="status-bar">
@@ -219,5 +348,13 @@
     </div>
   </div>
 </div>
+
+<script>
+  function toggleTheme() {
+    const html = document.documentElement;
+    html.classList.toggle('dark');
+    localStorage.setItem('theme', html.classList.contains('dark') ? 'dark' : 'light');
+  }
+</script>
 </body>
 </html>
