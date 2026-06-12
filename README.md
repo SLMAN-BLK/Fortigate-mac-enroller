@@ -1,12 +1,12 @@
-# Fortigate MAC Enroller
+# FortiGate MAC Enroller
 
-Application de gestion et d’enregistrement MAC pour FortiGate avec base de données MariaDB.
+A web application for managing and registering MAC addresses on FortiGate firewalls using a MariaDB database.
 
 ---
 
-## 📥 Installation
+# 📥 Installation
 
-### 1. Cloner le projet
+## 1. Clone the Repository
 
 ```bash
 git clone https://github.com/SLMAN-BLK/Fortigate-mac-enroller.git
@@ -15,32 +15,34 @@ cd Fortigate-mac-enroller
 
 ---
 
-### 2. Configuration de l’environnement
+## 2. Configure the Environment
 
-Copier le fichier d’exemple `.env` :
+Copy the example environment file:
 
 ```bash
 cp .env.example .env
 ```
 
-Modifier ensuite le fichier `.env` :
+Edit the configuration file:
 
 ```bash
 vi .env
 ```
 
+Update the variables according to your environment.
+
 ---
 
-## 🗄️ Installation de MariaDB
+# 🗄️ MariaDB Installation
 
-### Installer le serveur
+## Install MariaDB Server
 
 ```bash
 sudo apt update
 sudo apt install mariadb-server -y
 ```
 
-### Démarrer et activer le service
+## Start and Enable MariaDB
 
 ```bash
 sudo systemctl start mariadb
@@ -50,21 +52,21 @@ sudo systemctl status mariadb
 
 ---
 
-## ⚙️ Configuration MariaDB
+# ⚙️ MariaDB Configuration
 
-Éditer le fichier :
+Edit the MariaDB server configuration file:
 
 ```bash
 sudo vi /etc/mysql/mariadb.conf.d/50-server.cnf
 ```
 
-Modifier la ligne :
+Change the bind address:
 
 ```ini
 bind-address = 0.0.0.0
 ```
 
-Redémarrer MariaDB :
+Restart MariaDB:
 
 ```bash
 sudo systemctl restart mariadb
@@ -72,16 +74,20 @@ sudo systemctl restart mariadb
 
 ---
 
-## 🧑‍💻 Création de la base de données et utilisateur
+# 🧑‍💻 Database Setup
+
+Connect to MariaDB:
 
 ```bash
 sudo mysql
 ```
 
+Create the database and user:
+
 ```sql
 CREATE DATABASE `database-name`;
 
-CREATE USER 'username'@'%' IDENTIFIED BY 'password-of-the-user';
+CREATE USER 'username'@'%' IDENTIFIED BY 'password';
 
 GRANT ALL PRIVILEGES ON `database-name`.* TO 'username'@'%';
 
@@ -92,24 +98,47 @@ EXIT;
 
 ---
 
-## 🚀 Déploiement de l’application
+# 🚀 Application Deployment
+
+Run the deployment script:
 
 ```bash
-cd Fortigate-mac-enroller/
 chmod +x deploy.sh
 ./deploy.sh
+```
 
+Create the static directories:
+
+```bash
 cd /opt/mac-register
-mkdir static
-cd static
-mkdir css js
 
-systemctl restart  mac-register
+mkdir -p static/css
+mkdir -p static/js
+```
+
+Restart the application service:
+
+```bash
+sudo systemctl restart mac-register
 ```
 
 ---
 
-## 📌 Notes
+# 🐳 Docker Installation
 
-- Ne jamais pousser le fichier `.env` sur GitHub
-- Sécuriser l’accès MariaDB
+A Docker image is available on Docker Hub.
+
+For Docker deployment instructions, visit:
+
+https://hub.docker.com/r/slmanblk/fortigate-mac-enroller
+
+Follow the documentation provided on the Docker Hub page.
+
+---
+
+# 📌 Notes
+
+* Never commit the `.env` file to GitHub.
+* Use strong passwords for the MariaDB user account.
+* Restrict database access whenever possible.
+* Keep the application and database server updated.
