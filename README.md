@@ -42,7 +42,16 @@ sudo systemctl status mariadb
 ```
 
 ---
-
+> **Note – LDAP / Active Directory**
+>
+> To authenticate using LDAP, the Active Directory user account must have the **Company** field (located under the **Organization** tab) correctly populated.
+>
+> Accepted company values are:
+> - `TFC`
+> - `DFC`
+> - `RMC`
+>
+> Ensure that the **Company** attribute matches one of the values above; otherwise, LDAP authentication may fail.
 # ⚙️ MariaDB Configuration
 Edit the MariaDB server configuration file:
 ```bash
